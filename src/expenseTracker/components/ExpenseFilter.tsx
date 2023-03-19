@@ -2,6 +2,8 @@ interface Props {
   onSelectCategory: (category: string) => void;
 }
 
+import categories from "../categories";
+
 const ExpenseFilter = ({ onSelectCategory }: Props) => {
   return (
     <select
@@ -11,9 +13,11 @@ const ExpenseFilter = ({ onSelectCategory }: Props) => {
       <option value="" defaultValue="All">
         All
       </option>
-      <option value="Groceries">Groceries</option>
-      <option value="Utilities">Utilities</option>
-      <option value="Entertainment">Entertainment</option>
+      {categories.map((category) => (
+        <option key={category} value={category}>
+          {category}
+        </option>
+      ))}
     </select>
   );
 };

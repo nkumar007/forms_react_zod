@@ -1,32 +1,39 @@
-import { FieldValues, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import categories from "../categories";
 
 const schema = z.object({
   description: z.string().min(10, {
     message: "Description must be of atleast 20 charecters",
   }),
   amount: z.number({ invalid_type_error: "Age must be a number" }).min(200),
-  category: z.string({
-    required_error: "Category is required",
+  category: z.enum(categories, {
+    errorMap: () => ({ message: "Category is required" }),
   }),
 });
 
 type FormData = z.infer<typeof schema>;
 
-const ExpenseTracker = () => {
+interface Props {
+  onSubmit: (data: FormData) => void;
+}
+
+const ExpenseTracker = ({ onSubmit }: Props) => {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<FormData>({ resolver: zodResolver(schema) });
 
-  const onSubmit = (data: FieldValues) => {
-    // console.log(data);
-  };
-
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <form
+      onSubmit={handleSubmit((data) => {
+        onSubmit(data);
+        reset();
+      })}
+    >
       <div className="mb-3 text-start">
         <label htmlFor="description" className="form-label">
           Description
@@ -36,7 +43,6 @@ const ExpenseTracker = () => {
           {...register("description")}
           type="text"
           className="form-control"
-          // value={expense.description}
         />
         {errors.description && (
           <p className="text-danger">{errors.description.message}</p>
@@ -51,7 +57,6 @@ const ExpenseTracker = () => {
           {...register("amount", { valueAsNumber: true })}
           type="number"
           className="form-control"
-          // value={expense.amount}
         />
         {errors.amount && (
           <p className="text-danger">{errors.amount.message}</p>
@@ -66,12 +71,13 @@ const ExpenseTracker = () => {
           id="category"
           {...register("category")}
           aria-label="Default select example"
-          // value={expense.category}
         >
           <option defaultValue=""></option>
-          <option value="Groceries">Groceries</option>
-          <option value="Utilities">Utilities</option>
-          <option value="Entertainment">Entertainment</option>
+          {categories.map((category) => (
+            <option key={category} value={category}>
+              {category}
+            </option>
+          ))}
         </select>
         {errors.category && (
           <p className="text-danger">{errors.category.message}</p>
